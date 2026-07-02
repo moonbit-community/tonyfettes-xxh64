@@ -28,15 +28,14 @@ fn rotl(x : UInt64, r : Int) -> UInt64 {
 }
 
 ///|
-/// `XXH64_round`: fold one 64-bit lane into an accumulator.
-fn round(acc : UInt64, input : UInt64) -> UInt64 {
-  rotl(acc + input * P2, 31) * P1
-}
+/// `XXH64_round` (inlined): fold one 64-bit lane into an accumulator.
+/// rotl(acc + input * P2, 31) * P1
 
 ///|
 /// `XXH64_mergeRound`: combine a finished lane into the running hash.
 fn merge_round(acc : UInt64, val : UInt64) -> UInt64 {
-  (acc ^ round(0, val)) * P1 + P4
+  // Inlined round(0, val) = rotl(val * P2, 31) * P1
+  (acc ^ (rotl(val * P2, 31) * P1)) * P1 + P4
 }
 
 ///|
@@ -50,11 +49,9 @@ fn avalanche(h : UInt64) -> UInt64 {
 }
 
 ///|
-fn read64(data : Bytes, p : Int) -> UInt64 {
-  data.unsafe_read_uint64_le(p)
-}
-
-///|
+/// `XXH64_read64` (inlined): data.unsafe_read_uint64_le(p)
+///
+/// `XXH64_read32`: data.unsafe_read_uint32_le(p).to_uint64()
 fn read32(data : Bytes, p : Int) -> UInt64 {
   data.unsafe_read_uint32_le(p).to_uint64()
 }
@@ -76,10 +73,12 @@ pub fn xxh64(data : Bytes, seed? : UInt64 = 0) -> UInt64 {
     let mut a4 = seed - P1
     let limit = len - 32
     while p <= limit {
-      a1 = round(a1, read64(data, p))
-      a2 = round(a2, read64(data, p + 8))
-      a3 = round(a3, read64(data, p + 16))
-      a4 = round(a4, read64(data, p + 24))
+      // Inlined read64 + round: one load + arithmetic, no call overhead.
+      // round(acc, lane) = rotl(acc + lane * P2, 31) * P1
+      a1 = rotl(a1 + data.unsafe_read_uint64_le(p) * P2, 31) * P1
+      a2 = rotl(a2 + data.unsafe_read_uint64_le(p + 8) * P2, 31) * P1
+      a3 = rotl(a3 + data.unsafe_read_uint64_le(p + 16) * P2, 31) * P1
+      a4 = rotl(a4 + data.unsafe_read_uint64_le(p + 24) * P2, 31) * P1
       p = p + 32
     }
     let acc = rotl(a1, 1) + rotl(a2, 7) + rotl(a3, 12) + rotl(a4, 18)
@@ -91,7 +90,7 @@ pub fn xxh64(data : Bytes, seed? : UInt64 = 0) -> UInt64 {
   // Finalize the trailing 0..31 bytes: 8-byte, then 4-byte, then 1-byte chunks.
   let mut rem = len - p
   while rem >= 8 {
-    h = h ^ round(0, read64(data, p))
+    h = h ^ (rotl(data.unsafe_read_uint64_le(p) * P2, 31) * P1)
     h = rotl(h, 27) * P1 + P4
     p = p + 8
     rem = rem - 8

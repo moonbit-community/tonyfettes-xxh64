@@ -1,0 +1,7 @@
+import {
+  "tonyfettes/xxh64",
+}
+
+options(
+  "is-main": true,
+)

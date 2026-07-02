@@ -1,0 +1,8 @@
+import {
+  "tonyfettes/xxh64",
+  "moonbitlang/core/bench",
+}
+
+options(
+  "is-main": true,
+)
