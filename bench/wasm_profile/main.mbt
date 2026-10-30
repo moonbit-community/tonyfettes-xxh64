@@ -1,5 +1,5 @@
 ///|
-fn bench_input(len : Int, seed : Int) -> Bytes {
+fn bench_input(len : Int32, seed : Int32) -> Bytes {
   Bytes::makei(len, fn(i) { ((i * 131 + seed * 17 + 17) & 0xff).to_byte() })
 }
 

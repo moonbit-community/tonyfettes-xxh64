@@ -23,7 +23,7 @@ const P5 : UInt64 = 0x27D4EB2F165667C5UL
 
 ///|
 /// Rotate-left by `r` (1..63).
-fn rotl(x : UInt64, r : Int) -> UInt64 {
+fn rotl(x : UInt64, r : Int32) -> UInt64 {
   (x << r) | (x >> (64 - r))
 }
 
@@ -52,7 +52,7 @@ fn avalanche(h : UInt64) -> UInt64 {
 /// `XXH64_read64` (inlined): data.unsafe_read_uint64_le(p)
 ///
 /// `XXH64_read32`: data.unsafe_read_uint32_le(p).to_uint64()
-fn read32(data : Bytes, p : Int) -> UInt64 {
+fn read32(data : Bytes, p : Int32) -> UInt64 {
   data.unsafe_read_uint32_le(p).to_uint64()
 }
 
@@ -62,7 +62,7 @@ fn read32(data : Bytes, p : Int) -> UInt64 {
 /// ```mbt nocheck
 /// inspect(@xxh64.to_hex(@xxh64.xxh64(b"abc")), content="44bc2cf5ad770999")
 /// ```
-pub fn xxh64(data : Bytes, seed? : UInt64 = 0) -> UInt64 {
+pub fn xxh64(data : Bytes, seed~ : UInt64 = 0) -> UInt64 {
   let len = data.length()
   let mut p = 0
   let mut h = if len >= 32 {
@@ -118,7 +118,7 @@ pub fn xxh64(data : Bytes, seed? : UInt64 = 0) -> UInt64 {
 /// ```
 pub fn to_hex(hash : UInt64) -> String {
   let hexchars = "0123456789abcdef".to_array()
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   for k in 0..<16 {
     buf.write_char(hexchars[((hash >> ((15 - k) * 4)) & 0xF).to_int()])
   }
