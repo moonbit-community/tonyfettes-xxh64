@@ -1,17 +1,17 @@
 ///|
-fn bench_input(len : Int, variant : Int) -> Bytes {
+fn bench_input(len : Int32, variant : Int32) -> Bytes {
   Bytes::from_array(
     FixedArray::makei(len, i => ((i * 131 + variant * 17 + 17) & 0xff).to_byte())[:],
   )
 }
 
 ///|
-fn to_double(value : Int) -> Double {
+fn to_double(value : Int32) -> Double {
   value.to_int64().to_double()
 }
 
 ///|
-fn run_case(size : Int, iters : Int, reps : Int) -> UInt64 {
+fn run_case(size : Int32, iters : Int32, reps : Int32) -> UInt64 {
   let inputs : FixedArray[Bytes] = FixedArray::makei(16, variant => {
     bench_input(size, variant)
   })

@@ -13,4 +13,3 @@ pub fn xxh64(Bytes, seed? : UInt64) -> UInt64
 // Type aliases
 
 // Traits
-

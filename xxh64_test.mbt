@@ -4,13 +4,13 @@
 // finalize chunk (8/4/1-byte tails).
 
 ///|
-fn buf(n : Int) -> Bytes {
+fn buf(n : Int32) -> Bytes {
   Bytes::makei(n, fn(i) { (i % 256).to_byte() })
 }
 
 ///|
 test "XXH64 known-answer vectors (vs reference C)" {
-  let cases : Array[(Int, String)] = [
+  let cases : Array[(Int32, String)] = [
     (0, "ef46db3751d8e999"),
     (1, "e934a84adb052768"),
     (2, "4865a00ba85b7cd6"),
